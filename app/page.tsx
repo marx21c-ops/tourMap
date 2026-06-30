@@ -14,20 +14,19 @@ import CourseNavGuide from "@/components/navigation/CourseNavGuide";
 
 const KakaoMap = dynamic(() => import("@/components/map/KakaoMap"), { ssr: false });
 
-type Tab = "map" | "courses";
+type BottomTab = "home" | "docent" | "nearby" | "mypage";
+
+const NAV_H = 56; // px, bottom nav button area (safe area handled separately)
 
 export default function HomePage() {
   const router = useRouter();
 
-  // Map / place state
   const [activeCategory, setActiveCategory] = useState("all");
   const [selectedPlace, setSelectedPlace] = useState<IkseonPlace | null>(null);
-  const [activeTab, setActiveTab] = useState<Tab>("map");
+  const [bottomTab, setBottomTab] = useState<BottomTab>("home");
 
-  // User location
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 
-  // Course navigation state
   const [activeCourse, setActiveCourse] = useState<Course | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [isNavigating, setIsNavigating] = useState(false);
@@ -36,7 +35,6 @@ export default function HomePage() {
 
   const filteredPlaces = getPlacesByCategory(activeCategory);
 
-  // Places for the active course (in order)
   const coursePlaces = useMemo(
     () =>
       activeCourse
@@ -47,19 +45,16 @@ export default function HomePage() {
 
   const currentPlace = coursePlaces[currentStep] ?? null;
 
-  // Distance from user to current target
   const distanceToTarget = useMemo(() => {
     if (!userLocation || !currentPlace) return null;
     return haversineDistance(userLocation.lat, userLocation.lng, currentPlace.lat, currentPlace.lng);
   }, [userLocation, currentPlace]);
 
-  // Proximity detection — auto-flag arrival at 50m
   useEffect(() => {
     if (!isNavigating || !distanceToTarget || arrived) return;
     if (distanceToTarget <= 50) setArrived(true);
   }, [isNavigating, distanceToTarget, arrived]);
 
-  // Courses sorted by proximity to user
   const sortedCourses = useMemo(() => {
     if (!userLocation) return ikseonCourses;
     return [...ikseonCourses].sort((a, b) => {
@@ -76,7 +71,6 @@ export default function HomePage() {
     });
   }, [userLocation]);
 
-  // Nearest distance per course (for label in list)
   const nearestDistByCourse = useMemo((): Record<string, number> => {
     if (!userLocation) return {};
     return Object.fromEntries(
@@ -114,7 +108,7 @@ export default function HomePage() {
     setArrived(false);
     setShowComplete(false);
     setSelectedPlace(null);
-    setActiveTab("map");
+    setBottomTab("home");
   }, []);
 
   const handleStartNavigation = useCallback(() => {
@@ -154,14 +148,19 @@ export default function HomePage() {
     setCurrentStep(0);
     setIsNavigating(false);
     setArrived(false);
-    setActiveTab("courses");
+    setBottomTab("docent");
   }, []);
+
+  const navBottomOffset = `calc(${NAV_H}px + env(safe-area-inset-bottom))`;
 
   return (
     <div className="relative w-full h-dvh flex flex-col bg-white overflow-hidden">
       {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-10 px-5 pb-3 bg-white" style={{ paddingTop: 'max(env(safe-area-inset-top), 1rem)' }}>
-        <div className="flex items-center justify-between mb-3">
+      <div
+        className="absolute top-0 left-0 right-0 z-10 px-5 pb-4 bg-white"
+        style={{ paddingTop: "max(env(safe-area-inset-top), 1rem)" }}
+      >
+        <div className="flex items-center justify-between">
           <div>
             {activeCourse ? (
               <>
@@ -189,28 +188,10 @@ export default function HomePage() {
             </button>
           )}
         </div>
-
-        {/* Tab */}
-        <div className="flex rounded-2xl p-1 gap-1" style={{ backgroundColor: "#F3F4F5" }}>
-          {(["map", "courses"] as Tab[]).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className="flex-1 py-2 rounded-xl text-sm font-medium transition-all"
-              style={
-                activeTab === tab
-                  ? { backgroundColor: "#151613", color: "#FFFFFF" }
-                  : { color: "#7C807B" }
-              }
-            >
-              {tab === "map" ? "🗺 지도" : "✨ 코스 추천"}
-            </button>
-          ))}
-        </div>
       </div>
 
-      {/* Map Screen */}
-      {activeTab === "map" && (
+      {/* Map / Home Screen */}
+      {bottomTab === "home" && (
         <div className="flex-1 relative">
           <div className="absolute inset-0 isolate">
             <KakaoMap
@@ -225,13 +206,18 @@ export default function HomePage() {
             />
           </div>
 
-          {/* Normal map: category filter + place count badge */}
           {!activeCourse && (
             <>
-              <div className="absolute bottom-4 left-0 right-0 z-10">
+              <div
+                className="absolute left-0 right-0 z-10"
+                style={{ bottom: `calc(${navBottomOffset} + 8px)` }}
+              >
                 <CategoryFilter activeCategory={activeCategory} onChange={handleCategoryChange} />
               </div>
-              <div className="absolute top-[144px] left-5 z-10">
+              <div
+                className="absolute left-5 z-10"
+                style={{ top: "calc(max(env(safe-area-inset-top), 1rem) + 92px)" }}
+              >
                 <div
                   className="rounded-full px-3 py-1.5 text-xs font-medium shadow-sm"
                   style={{ backgroundColor: "#151613", color: "#FFFFFF" }}
@@ -243,16 +229,17 @@ export default function HomePage() {
                 <PlaceBottomSheet
                   place={selectedPlace}
                   onClose={() => setSelectedPlace(null)}
+                  bottomOffset={navBottomOffset}
                 />
               )}
             </>
           )}
 
-          {/* Course preview: "코스 시작하기" bottom bar */}
+          {/* Course preview bottom bar */}
           {activeCourse && !isNavigating && (
             <div
-              className="absolute bottom-0 left-0 right-0 z-30 bg-white px-5 pb-safe pb-6 pt-4"
-              style={{ boxShadow: "0 -4px 24px rgba(0,0,0,0.10)" }}
+              className="absolute left-0 right-0 z-30 bg-white px-5 py-4"
+              style={{ bottom: navBottomOffset, boxShadow: "0 -4px 24px rgba(0,0,0,0.10)" }}
             >
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex gap-1.5">
@@ -299,14 +286,21 @@ export default function HomePage() {
               arrived={arrived}
               onNext={handleNextStep}
               onExit={handleExitNavigation}
+              navHeight={NAV_H}
             />
           )}
         </div>
       )}
 
-      {/* Course List Screen */}
-      {activeTab === "courses" && (
-        <div className="flex-1 min-h-0 overflow-y-auto pb-6 px-5 space-y-6" style={{ paddingTop: 'calc(max(env(safe-area-inset-top), 1rem) + 114px)' }}>
+      {/* Docent / Course List Screen */}
+      {bottomTab === "docent" && (
+        <div
+          className="flex-1 min-h-0 overflow-y-auto px-5 space-y-6"
+          style={{
+            paddingTop: "calc(max(env(safe-area-inset-top), 1rem) + 84px)",
+            paddingBottom: `calc(${NAV_H}px + env(safe-area-inset-bottom) + 24px)`,
+          }}
+        >
           <p className="text-sm font-medium" style={{ color: "#7C807B" }}>
             {userLocation
               ? `📍 내 위치 기준 가까운 순 · 총 ${sortedCourses.length}개`
@@ -339,6 +333,63 @@ export default function HomePage() {
         </div>
       )}
 
+      {/* Nearby placeholder */}
+      {bottomTab === "nearby" && (
+        <div className="flex-1 flex items-center justify-center" style={{ paddingBottom: `${NAV_H}px` }}>
+          <div className="text-center">
+            <p className="text-5xl mb-4">📡</p>
+            <p className="text-base font-semibold" style={{ color: "#151613" }}>내 주변</p>
+            <p className="text-sm mt-2" style={{ color: "#7C807B" }}>곧 서비스될 예정이에요</p>
+          </div>
+        </div>
+      )}
+
+      {/* My Page placeholder */}
+      {bottomTab === "mypage" && (
+        <div className="flex-1 flex items-center justify-center" style={{ paddingBottom: `${NAV_H}px` }}>
+          <div className="text-center">
+            <p className="text-5xl mb-4">👤</p>
+            <p className="text-base font-semibold" style={{ color: "#151613" }}>마이페이지</p>
+            <p className="text-sm mt-2" style={{ color: "#7C807B" }}>곧 서비스될 예정이에요</p>
+          </div>
+        </div>
+      )}
+
+      {/* Bottom Navigation */}
+      <div
+        className="fixed bottom-0 left-0 right-0 z-40 bg-white"
+        style={{
+          paddingBottom: "env(safe-area-inset-bottom)",
+          boxShadow: "0 -1px 0 rgba(0,0,0,0.08)",
+        }}
+      >
+        <div className="flex" style={{ height: `${NAV_H}px` }}>
+          {(
+            [
+              { id: "home" as BottomTab, label: "홈", Icon: HomeIcon },
+              { id: "docent" as BottomTab, label: "도슨트", Icon: DocentIcon },
+              { id: "nearby" as BottomTab, label: "내 주변", Icon: NearbyIcon },
+              { id: "mypage" as BottomTab, label: "마이페이지", Icon: MypageIcon },
+            ] as const
+          ).map(({ id, label, Icon }) => {
+            const active = bottomTab === id;
+            const color = active ? "#7C3AED" : "#9CA3AF";
+            return (
+              <button
+                key={id}
+                onClick={() => setBottomTab(id)}
+                className="flex-1 flex flex-col items-center justify-center gap-0.5"
+              >
+                <Icon color={color} />
+                <span className="text-[10px] font-medium" style={{ color }}>
+                  {label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Course complete modal */}
       {showComplete && (
         <div
@@ -365,5 +416,51 @@ export default function HomePage() {
         </div>
       )}
     </div>
+  );
+}
+
+function HomeIcon({ color }: { color: string }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M3 9.5L12 3L21 9.5V20C21 20.5523 20.5523 21 20 21H15V15H9V21H4C3.44772 21 3 20.5523 3 20V9.5Z"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function DocentIcon({ color }: { color: string }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="9" stroke={color} strokeWidth="1.8" />
+      <path d="M12 7V12L15 14" stroke={color} strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function NearbyIcon({ color }: { color: string }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="16" width="4" height="5" rx="1" fill={color} />
+      <rect x="10" y="11" width="4" height="10" rx="1" fill={color} />
+      <rect x="17" y="5" width="4" height="16" rx="1" fill={color} />
+    </svg>
+  );
+}
+
+function MypageIcon({ color }: { color: string }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="8" r="4" stroke={color} strokeWidth="1.8" />
+      <path
+        d="M4 20C4 17 7.6 14 12 14C16.4 14 20 17 20 20"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
