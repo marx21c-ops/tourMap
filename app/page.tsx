@@ -245,7 +245,13 @@ export default function HomePage() {
           {/* Normal map: category filter + place count badge */}
           {!activeCourse && (
             <>
-              <div className="absolute bottom-4 left-0 right-0 z-10">
+              <div
+                className="absolute bottom-0 left-0 right-0 z-10 bg-white pt-3"
+                style={{
+                  boxShadow: "0 -4px 20px rgba(0,0,0,0.08)",
+                  paddingBottom: "max(env(safe-area-inset-bottom), 12px)",
+                }}
+              >
                 <CategoryFilter activeCategory={activeCategory} onChange={handleCategoryChange} />
               </div>
               <div className="absolute top-[144px] left-5 z-10">

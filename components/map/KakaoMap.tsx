@@ -84,7 +84,7 @@ function UserLocationControl({
     btn.innerHTML = "📍";
     btn.title = "내 위치 보기";
     btn.style.cssText =
-      "position:absolute;bottom:140px;right:12px;z-index:900;background:white;border:none;border-radius:50%;width:44px;height:44px;font-size:20px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;";
+      "position:absolute;bottom:100px;right:12px;z-index:900;background:white;border:none;border-radius:50%;width:44px;height:44px;font-size:20px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;";
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
       navigator.geolocation?.getCurrentPosition(
