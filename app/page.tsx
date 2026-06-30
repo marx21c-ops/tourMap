@@ -191,7 +191,7 @@ export default function HomePage() {
         </div>
 
         {/* Tab */}
-        <div className="flex rounded-2xl p-1 gap-1" style={{ backgroundColor: "#FFFFFF", border: "1px solid #E8E8E8" }}>
+        <div className="flex rounded-2xl p-1 gap-1" style={{ backgroundColor: "#F3F4F5" }}>
           {(["map", "courses"] as Tab[]).map((tab) => (
             <button
               key={tab}
