@@ -179,21 +179,13 @@ export default function HomePage() {
               </>
             )}
           </div>
-          {activeCourse ? (
+          {activeCourse && (
             <button
               onClick={handleExitCourse}
               className="px-4 py-2 rounded-xl text-xs font-medium border"
               style={{ borderColor: "#E2E2E2", color: "#7C807B", backgroundColor: "#FFFFFF" }}
             >
               코스 종료
-            </button>
-          ) : (
-            <button
-              onClick={() => setActiveTab("courses")}
-              className="px-4 py-2 rounded-xl text-xs font-medium text-white"
-              style={{ backgroundColor: "#151613" }}
-            >
-              추천 코스
             </button>
           )}
         </div>
@@ -211,7 +203,7 @@ export default function HomePage() {
                   : { color: "#7C807B" }
               }
             >
-              {tab === "map" ? "🗺 지도" : "✨ 코스"}
+              {tab === "map" ? "🗺 지도" : "✨ 코스 추천"}
             </button>
           ))}
         </div>
