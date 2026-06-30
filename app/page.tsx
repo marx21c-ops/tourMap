@@ -254,22 +254,24 @@ export default function HomePage() {
               className="absolute bottom-0 left-0 right-0 z-30 bg-white px-5 pb-safe pb-6 pt-4"
               style={{ boxShadow: "0 -4px 24px rgba(0,0,0,0.10)" }}
             >
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex gap-1.5">
-                  {coursePlaces.map((_, i) => (
+              <div className="mb-3 space-y-1.5 max-h-36 overflow-y-auto">
+                {coursePlaces.map((place, i) => (
+                  <div key={i} className="flex items-center gap-2">
                     <div
-                      key={i}
-                      className="w-6 h-6 rounded-full flex items-center justify-center text-white border-2 border-white font-bold"
-                      style={{ backgroundColor: "#151613", fontSize: 10 }}
+                      className="w-5 h-5 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
+                      style={{ backgroundColor: "#151613", fontSize: 9 }}
                     >
                       {i + 1}
                     </div>
-                  ))}
-                </div>
-                <span className="text-xs" style={{ color: "#7C807B" }}>
-                  총 {activeCourse.placeCount}개 장소 · {activeCourse.duration}
-                </span>
+                    <span className="text-xs truncate" style={{ color: "#151613" }}>
+                      {place.name}
+                    </span>
+                  </div>
+                ))}
               </div>
+              <p className="text-xs mb-3" style={{ color: "#7C807B" }}>
+                총 {activeCourse.placeCount}개 장소 · {activeCourse.duration}
+              </p>
               <div className="flex gap-3">
                 <button
                   onClick={handleBackToCourses}
