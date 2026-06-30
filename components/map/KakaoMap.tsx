@@ -47,7 +47,7 @@ function UserLocationControl({
 
   useEffect(() => {
     const locationIcon = L.divIcon({
-      html: `<div style="width:20px;height:20px;background:#3B82F6;border-radius:50%;border:3px solid white;box-shadow:0 0 0 4px rgba(59,130,246,0.3);"></div>`,
+      html: `<div style="width:20px;height:20px;background:#99F950;border-radius:50%;border:3px solid white;box-shadow:0 0 0 3px #151613,0 2px 10px rgba(0,0,0,0.35);"></div>`,
       className: "",
       iconSize: [20, 20],
       iconAnchor: [10, 10],
