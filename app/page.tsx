@@ -200,9 +200,15 @@ export default function HomePage() {
               className="flex flex-col items-center gap-0.5"
             >
               <span className="text-xl leading-none">📖</span>
-              <span className="text-xs font-semibold" style={{ color: completedCount > 0 ? "#151613" : "#B0B3AF" }}>
-                {completedCount}/4
-              </span>
+              <div className="flex gap-0.5 mt-0.5">
+                {[0, 1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{ backgroundColor: i < completedCount ? "#151613" : "#D1D5DB" }}
+                  />
+                ))}
+              </div>
             </button>
           )}
         </div>

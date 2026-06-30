@@ -81,7 +81,7 @@ function UserLocationControl({
 
     // 📍 button
     const btn = document.createElement("button");
-    btn.innerHTML = "📍";
+    btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#151613" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="2" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="22" y2="12"/></svg>`;
     btn.title = "내 위치 보기";
     btn.style.cssText =
       "position:absolute;bottom:100px;right:12px;z-index:900;background:white;border:none;border-radius:50%;width:44px;height:44px;font-size:20px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;";

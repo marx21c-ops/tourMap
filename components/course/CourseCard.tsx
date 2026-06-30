@@ -17,6 +17,12 @@ export default function CourseCard({ course, onClick, onPreview, distanceText }:
       <div className="relative h-44">
         <Image src={course.coverImage} alt={course.title} fill sizes="(max-width: 640px) 100vw, 50vw" className="object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+        <div
+          className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-semibold text-white"
+          style={{ backgroundColor: "rgba(0,0,0,0.40)", backdropFilter: "blur(4px)" }}
+        >
+          완주율 {course.completionRate}%
+        </div>
         <div className="absolute bottom-3 left-4 right-4">
           <div className="flex gap-1.5 flex-wrap mb-1">
             {course.tags.slice(0, 3).map((tag) => (

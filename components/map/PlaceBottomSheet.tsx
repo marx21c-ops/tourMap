@@ -1,6 +1,7 @@
 "use client";
 
 import { IkseonPlace, CATEGORY_COLORS, CATEGORY_LABELS, CATEGORY_EMOJIS } from "@/types";
+import { ikseonCourses } from "@/data/courses";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -15,6 +16,7 @@ export default function PlaceBottomSheet({ place, onClose }: Props) {
   if (!place) return null;
 
   const color = CATEGORY_COLORS[place.category];
+  const primaryCourse = ikseonCourses.find((c) => c.placeIds.includes(place.id)) ?? null;
 
   return (
     <>
@@ -70,18 +72,20 @@ export default function PlaceBottomSheet({ place, onClose }: Props) {
                 const url = `https://map.kakao.com/link/map/${place.name},${place.lat},${place.lng}`;
                 window.open(url, "_blank");
               }}
-              className="flex-1 py-3 rounded-xl text-sm font-medium border"
+              className={primaryCourse ? "flex-1 py-3 rounded-xl text-sm font-medium border" : "w-full py-3 rounded-xl text-sm font-medium border"}
               style={{ borderColor: "#151613", color: "#151613", backgroundColor: "#FFFFFF" }}
             >
               길찾기
             </button>
-            <button
-              onClick={() => router.push(`/course/c01?startPlace=${place.id}`)}
-              className="flex-1 py-3 rounded-xl text-sm font-medium text-white"
-              style={{ backgroundColor: "#151613" }}
-            >
-              코스 시작하기
-            </button>
+            {primaryCourse && (
+              <button
+                onClick={() => router.push(`/course/${primaryCourse.id}?startPlace=${place.id}`)}
+                className="flex-[2] py-3 rounded-xl text-sm font-medium text-white"
+                style={{ backgroundColor: "#151613" }}
+              >
+                {primaryCourse.title.replace(" 코스", "")} 코스 →
+              </button>
+            )}
           </div>
         </div>
       </div>
