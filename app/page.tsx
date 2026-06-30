@@ -149,6 +149,14 @@ export default function HomePage() {
     setArrived(false);
   }, []);
 
+  const handleBackToCourses = useCallback(() => {
+    setActiveCourse(null);
+    setCurrentStep(0);
+    setIsNavigating(false);
+    setArrived(false);
+    setActiveTab("courses");
+  }, []);
+
   return (
     <div className="relative w-full h-dvh flex flex-col bg-white overflow-hidden">
       {/* Header */}
@@ -270,13 +278,22 @@ export default function HomePage() {
                   총 {activeCourse.placeCount}개 장소 · {activeCourse.duration}
                 </span>
               </div>
-              <button
-                onClick={handleStartNavigation}
-                className="w-full py-4 rounded-xl text-sm font-semibold text-white"
-                style={{ backgroundColor: "#151613" }}
-              >
-                이 코스로 내비게이션 시작 →
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleBackToCourses}
+                  className="flex-1 py-4 rounded-xl text-sm font-semibold border"
+                  style={{ borderColor: "#E2E2E2", color: "#7C807B" }}
+                >
+                  ← 돌아가기
+                </button>
+                <button
+                  onClick={handleStartNavigation}
+                  className="flex-[2] py-4 rounded-xl text-sm font-semibold text-white"
+                  style={{ backgroundColor: "#151613" }}
+                >
+                  코스 출발 →
+                </button>
+              </div>
             </div>
           )}
 
@@ -297,25 +314,40 @@ export default function HomePage() {
 
       {/* Course List Screen */}
       {activeTab === "courses" && (
-        <div className="flex-1 min-h-0 overflow-y-auto pb-6 px-5 space-y-4" style={{ paddingTop: 'calc(max(env(safe-area-inset-top), 1rem) + 114px)' }}>
+        <div className="flex-1 min-h-0 overflow-y-auto pb-6 px-5 space-y-6" style={{ paddingTop: 'calc(max(env(safe-area-inset-top), 1rem) + 114px)' }}>
           <p className="text-sm font-medium" style={{ color: "#7C807B" }}>
             {userLocation
               ? `📍 내 위치 기준 가까운 순 · 총 ${sortedCourses.length}개`
               : `총 ${ikseonCourses.length}개의 추천 코스`}
           </p>
-          {sortedCourses.map((course) => {
+          {sortedCourses.map((course, index) => {
             const dist = nearestDistByCourse[course.id];
             return (
               <div key={course.id}>
+                <div className="flex items-center gap-2.5 mb-2">
+                  <span
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                    style={{ backgroundColor: "#151613" }}
+                  >
+                    {index + 1}
+                  </span>
+                  <span className="text-sm font-semibold" style={{ color: "#151613" }}>
+                    {course.title}
+                  </span>
+                </div>
                 {userLocation && dist < Infinity && (
-                  <p className="text-xs mb-1 pl-1" style={{ color: "#7C807B" }}>
+                  <p className="text-xs mb-1.5 pl-1" style={{ color: "#7C807B" }}>
                     📍 가장 가까운 장소까지 약 {formatDistance(dist)}
                   </p>
                 )}
-                <CourseCard
-                  course={course}
+                <CourseCard course={course} />
+                <button
                   onClick={() => handleCourseSelect(course)}
-                />
+                  className="mt-2 w-full py-3 rounded-xl text-sm font-medium"
+                  style={{ backgroundColor: "#F3F4F5", color: "#151613" }}
+                >
+                  지도에서 미리보기 →
+                </button>
               </div>
             );
           })}
