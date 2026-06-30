@@ -7,10 +7,9 @@ import Image from "next/image";
 interface Props {
   place: IkseonPlace | null;
   onClose: () => void;
-  bottomOffset?: string;
 }
 
-export default function PlaceBottomSheet({ place, onClose, bottomOffset }: Props) {
+export default function PlaceBottomSheet({ place, onClose }: Props) {
   const router = useRouter();
 
   if (!place) return null;
@@ -24,10 +23,7 @@ export default function PlaceBottomSheet({ place, onClose, bottomOffset }: Props
         onClick={onClose}
         style={{ background: "transparent" }}
       />
-      <div
-        className="absolute left-0 right-0 z-30 bg-white rounded-t-3xl shadow-2xl animate-slide-up max-h-[55%] overflow-y-auto"
-        style={{ bottom: bottomOffset ?? "0" }}
-      >
+      <div className="absolute bottom-0 left-0 right-0 z-30 bg-white rounded-t-3xl shadow-2xl animate-slide-up max-h-[55%] overflow-y-auto">
         <div className="w-10 h-1 rounded-full mx-auto mt-3 mb-4" style={{ backgroundColor: "#E2E2E2" }} />
 
         {place.imageUrl && (

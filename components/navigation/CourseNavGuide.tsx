@@ -11,7 +11,6 @@ interface Props {
   arrived: boolean;
   onNext: () => void;
   onExit: () => void;
-  navHeight?: number;
 }
 
 export default function CourseNavGuide({
@@ -22,7 +21,6 @@ export default function CourseNavGuide({
   arrived,
   onNext,
   onExit,
-  navHeight = 0,
 }: Props) {
   const isLast = currentStep >= course.placeCount - 1;
   const progress = Math.round((currentStep / course.placeCount) * 100);
@@ -32,7 +30,7 @@ export default function CourseNavGuide({
       {/* Handle */}
       <div className="w-10 h-1 rounded-full mx-auto mt-3 mb-4" style={{ backgroundColor: "#E2E2E2" }} />
 
-      <div className="px-5" style={{ paddingBottom: `calc(env(safe-area-inset-bottom) + ${navHeight}px + 24px)` }}>
+      <div className="px-5 pb-safe pb-6">
         {/* Top row: progress + exit */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
