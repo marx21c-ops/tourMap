@@ -114,14 +114,17 @@ export default function KakaoMap({ places, onPlaceSelect, selectedPlaceId }: Pro
   };
 
   useEffect(() => {
+    let cancelled = false;
     const tryInit = () => {
-      if (window.kakao?.maps) {
-        window.kakao.maps.load(initMap);
+      if (cancelled) return;
+      if (window.kakao) {
+        window.kakao.maps.load(() => { if (!cancelled) initMap(); });
       } else {
         setTimeout(tryInit, 200);
       }
     };
     tryInit();
+    return () => { cancelled = true; };
   }, [initMap]);
 
   return <div ref={mapRef} className="w-full h-full" />;

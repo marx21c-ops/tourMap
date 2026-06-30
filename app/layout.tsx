@@ -19,13 +19,11 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
-      <head>
+      <body>
         <Script
           src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_KEY}&autoload=false`}
-          strategy="beforeInteractive"
+          strategy="afterInteractive"
         />
-      </head>
-      <body>
         <div className="app-shell">{children}</div>
       </body>
     </html>
