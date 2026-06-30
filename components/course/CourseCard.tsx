@@ -9,7 +9,7 @@ interface Props {
 export default function CourseCard({ course, onClick }: Props) {
   return (
     <div
-      className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 cursor-pointer active:scale-[0.98] transition-transform"
+      className="bg-white rounded-xl overflow-hidden shadow-sm cursor-pointer active:scale-[0.98] transition-transform"
       onClick={onClick}
     >
       <div className="relative h-44">
@@ -26,9 +26,9 @@ export default function CourseCard({ course, onClick }: Props) {
         </div>
       </div>
       <div className="p-4">
-        <h3 className="font-bold text-gray-900 text-base mb-0.5">{course.title}</h3>
-        <p className="text-sm text-gray-500 mb-3">{course.subtitle}</p>
-        <div className="flex gap-3 text-xs text-gray-600">
+        <h3 className="font-semibold text-base mb-0.5" style={{ color: "#151613" }}>{course.title}</h3>
+        <p className="text-sm mb-3" style={{ color: "#7C807B" }}>{course.subtitle}</p>
+        <div className="flex gap-3 text-xs" style={{ color: "#7C807B" }}>
           <span>⏱ {course.duration}</span>
           <span>📍 {course.placeCount}개 장소</span>
           <span>💪 {course.difficulty}</span>

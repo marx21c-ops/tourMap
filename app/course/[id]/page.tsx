@@ -19,9 +19,9 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
   const places = course.placeIds.map(getPlaceById).filter(Boolean);
 
   const difficultyColor = {
-    쉬움: "#22C55E",
-    보통: "#F59E0B",
-    어려움: "#EF4444",
+    쉬움: "#99F950",
+    보통: "#FFBE2B",
+    어려움: "#FF4C00",
   }[course.difficulty];
 
   return (
@@ -54,18 +54,18 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
       <div className="relative -mt-6 bg-white rounded-t-3xl z-10">
         <div className="px-5 pt-6 pb-32">
           {/* Location + Tags */}
-          <p className="text-xs text-gray-400 mb-2">서울 · 종로구 익선동</p>
+          <p className="text-xs font-medium mb-2" style={{ color: "#7C807B" }}>서울 · 종로구 익선동</p>
           <div className="flex gap-1.5 flex-wrap mb-3">
             {course.tags.map((tag) => (
-              <span key={tag} className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+              <span key={tag} className="px-2.5 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: "#F3F4F5", color: "#7C807B" }}>
                 #{tag}
               </span>
             ))}
           </div>
 
           {/* Title */}
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">{course.title}</h1>
-          <p className="text-gray-500 text-sm mb-5">{course.subtitle}</p>
+          <h1 className="text-2xl font-semibold mb-1" style={{ color: "#151613" }}>{course.title}</h1>
+          <p className="text-sm mb-5" style={{ color: "#7C807B" }}>{course.subtitle}</p>
 
           {/* Info Row */}
           <div className="flex gap-3 mb-6">
@@ -74,9 +74,9 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
               { icon: "📍", value: `${course.placeCount}개 장소` },
               { icon: "💪", value: course.difficulty, color: difficultyColor },
             ].map(({ icon, value, color }) => (
-              <div key={value} className="flex-1 bg-gray-50 rounded-2xl py-3 flex flex-col items-center gap-1">
+              <div key={value} className="flex-1 rounded-xl py-3 flex flex-col items-center gap-1" style={{ backgroundColor: "#F3F4F5" }}>
                 <span className="text-lg">{icon}</span>
-                <span className="text-xs font-semibold" style={color ? { color } : { color: "#374151" }}>
+                <span className="text-xs font-semibold" style={color ? { color } : { color: "#151613" }}>
                   {value}
                 </span>
               </div>
@@ -85,14 +85,14 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
 
           {/* Completion Rate */}
           <div className="mb-6">
-            <div className="flex justify-between text-xs text-gray-500 mb-1.5">
+            <div className="flex justify-between text-xs mb-1.5" style={{ color: "#7C807B" }}>
               <span>완주 예상률</span>
-              <span className="font-semibold text-gray-900">{course.completionRate}%</span>
+              <span className="font-semibold" style={{ color: "#151613" }}>{course.completionRate}%</span>
             </div>
-            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: "#F3F4F5" }}>
               <div
                 className="h-full rounded-full"
-                style={{ width: `${course.completionRate}%`, backgroundColor: "#22C55E" }}
+                style={{ width: `${course.completionRate}%`, backgroundColor: "#99F950" }}
               />
             </div>
           </div>
@@ -104,13 +104,13 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
 
           {/* Description */}
           <div className="mb-6">
-            <h2 className="text-base font-bold text-gray-900 mb-2">코스 소개</h2>
-            <p className="text-sm text-gray-600 leading-relaxed">{course.description}</p>
+            <h2 className="text-base font-semibold mb-2" style={{ color: "#151613" }}>코스 소개</h2>
+            <p className="text-sm leading-relaxed" style={{ color: "#7C807B" }}>{course.description}</p>
           </div>
 
           {/* Places List */}
           <div>
-            <h2 className="text-base font-bold text-gray-900 mb-3">포함 장소</h2>
+            <h2 className="text-base font-semibold mb-3" style={{ color: "#151613" }}>포함 장소</h2>
             <div className="space-y-3">
               {places.map((place, i) => {
                 if (!place) return null;
@@ -125,13 +125,13 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-0.5">
-                        <span className="font-semibold text-gray-900 text-sm">{place.name}</span>
+                        <span className="font-semibold text-sm" style={{ color: "#151613" }}>{place.name}</span>
                         <span className="text-xs" style={{ color }}>
                           {CATEGORY_EMOJIS[place.category]} {CATEGORY_LABELS[place.category]}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-500">{place.shortDescription}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">⏱ 약 {place.estimatedStayMinutes}분</p>
+                      <p className="text-xs" style={{ color: "#7C807B" }}>{place.shortDescription}</p>
+                      <p className="text-xs mt-0.5" style={{ color: "#9E9F9C" }}>⏱ 약 {place.estimatedStayMinutes}분</p>
                     </div>
                   </div>
                 );

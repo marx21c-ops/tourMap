@@ -1,135 +1,152 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { IkseonPlace, CATEGORY_COLORS, IKSEON_CENTER } from "@/types";
+import { useEffect, useRef } from "react";
+import { MapContainer, TileLayer, Marker } from "react-leaflet";
+import { useMap } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { IkseonPlace, Course, CATEGORY_COLORS, IKSEON_CENTER } from "@/types";
+import CourseRouteControl from "./CourseRouteControl";
 
 interface Props {
   places: IkseonPlace[];
   onPlaceSelect: (place: IkseonPlace) => void;
   selectedPlaceId?: string | null;
+  activeCourse?: Course | null;
+  coursePlaces?: IkseonPlace[];
+  currentStep?: number;
+  isNavigating?: boolean;
+  onLocationUpdate?: (lat: number, lng: number) => void;
 }
 
 const EMOJI: Record<string, string> = {
   hanok: "🏛️", cafe: "☕", food: "🍜", photo: "📸", workshop: "🎨", culture: "🏯",
 };
 
-function markerHTML(place: IkseonPlace, isSelected: boolean) {
+function createMarkerIcon(place: IkseonPlace, isSelected: boolean) {
   const color = CATEGORY_COLORS[place.category];
   const size = isSelected ? 44 : 36;
   const font = isSelected ? 18 : 14;
-  return `<div style="width:${size}px;height:${size}px;background:${color};border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2.5px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="transform:rotate(45deg);font-size:${font}px;line-height:1;">${EMOJI[place.category]}</span></div>`;
+  return L.divIcon({
+    html: `<div style="width:${size}px;height:${size}px;background:${color};border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2.5px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="transform:rotate(45deg);font-size:${font}px;line-height:1;">${EMOJI[place.category]}</span></div>`,
+    className: "",
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size],
+  });
 }
 
-export default function KakaoMap({ places, onPlaceSelect, selectedPlaceId }: Props) {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<kakao.maps.Map | null>(null);
-  const overlaysRef = useRef<kakao.maps.CustomOverlay[]>([]);
-  const myLocRef = useRef<kakao.maps.CustomOverlay | null>(null);
-  const [mapError, setMapError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+function UserLocationControl({
+  onLocationUpdate,
+  isNavigating,
+}: {
+  onLocationUpdate?: (lat: number, lng: number) => void;
+  isNavigating?: boolean;
+}) {
+  const map = useMap();
+  const markerRef = useRef<L.Marker | null>(null);
 
-  // Initialize map once
   useEffect(() => {
-    const initMap = () => {
-      if (!mapRef.current || mapInstanceRef.current) return;
-
-      try {
-        const map = new window.kakao.maps.Map(mapRef.current, {
-          center: new window.kakao.maps.LatLng(IKSEON_CENTER.lat, IKSEON_CENTER.lng),
-          level: 3,
-        });
-        mapInstanceRef.current = map;
-        setLoading(false);
-
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            (pos) => {
-              const { latitude: lat, longitude: lng } = pos.coords;
-              if (myLocRef.current) myLocRef.current.setMap(null);
-              myLocRef.current = new window.kakao.maps.CustomOverlay({
-                position: new window.kakao.maps.LatLng(lat, lng),
-                content: `<div style="width:20px;height:20px;background:#3B82F6;border-radius:50%;border:3px solid white;box-shadow:0 0 0 4px rgba(59,130,246,0.3);"></div>`,
-                map,
-                yAnchor: 0.5,
-              });
-              map.panTo(new window.kakao.maps.LatLng(lat, lng));
-            },
-            () => {}
-          );
-        }
-      } catch (e) {
-        setMapError("지도 초기화 실패: " + String(e));
-        setLoading(false);
-      }
-    };
-
-    if (window.kakao?.maps) {
-      initMap();
-      return;
-    }
-
-    const key = process.env.NEXT_PUBLIC_KAKAO_MAP_KEY;
-    if (!key) {
-      setMapError("KAKAO_MAP_KEY 환경변수 없음");
-      setLoading(false);
-      return;
-    }
-
-    const existing = document.querySelector('script[src*="dapi.kakao.com"]');
-    if (existing) {
-      existing.addEventListener("load", initMap);
-      return;
-    }
-
-    const script = document.createElement("script");
-    // autoload=false 없이 로드 — SDK가 준비되면 kakao.maps 즉시 사용 가능
-    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${key}`;
-    script.async = true;
-    script.onload = initMap;
-    script.onerror = () => {
-      setMapError(`SDK 로드 실패 (키: ${key?.slice(0, 8)}...)`);
-      setLoading(false);
-    };
-    document.head.appendChild(script);
-  }, []);
-
-  // Update markers when places or selection changes
-  useEffect(() => {
-    const map = mapInstanceRef.current;
-    if (!map) return;
-
-    overlaysRef.current.forEach((o) => o.setMap(null));
-    overlaysRef.current = [];
-
-    places.forEach((place) => {
-      const isSelected = place.id === selectedPlaceId;
-      const overlay = new window.kakao.maps.CustomOverlay({
-        position: new window.kakao.maps.LatLng(place.lat, place.lng),
-        content: markerHTML(place, isSelected),
-        map,
-        yAnchor: 1,
-      });
-      const el = (overlay as unknown as { a: HTMLElement }).a;
-      if (el) el.addEventListener("click", () => onPlaceSelect(place));
-      overlaysRef.current.push(overlay);
+    const locationIcon = L.divIcon({
+      html: `<div style="width:20px;height:20px;background:#3B82F6;border-radius:50%;border:3px solid white;box-shadow:0 0 0 4px rgba(59,130,246,0.3);"></div>`,
+      className: "",
+      iconSize: [20, 20],
+      iconAnchor: [10, 10],
     });
-  }, [places, selectedPlaceId, onPlaceSelect]);
 
+    const placeMarker = (lat: number, lng: number) => {
+      if (markerRef.current) {
+        markerRef.current.setLatLng([lat, lng]);
+      } else {
+        markerRef.current = L.marker([lat, lng], { icon: locationIcon }).addTo(map);
+      }
+      onLocationUpdate?.(lat, lng);
+    };
+
+    let watchId: number | null = null;
+
+    if (isNavigating) {
+      // Continuous tracking during navigation
+      watchId = navigator.geolocation?.watchPosition(
+        (pos) => placeMarker(pos.coords.latitude, pos.coords.longitude),
+        () => {},
+        { enableHighAccuracy: true, maximumAge: 3000, timeout: 10000 }
+      ) ?? null;
+    } else {
+      // One-shot on load
+      navigator.geolocation?.getCurrentPosition(
+        (pos) => placeMarker(pos.coords.latitude, pos.coords.longitude),
+        () => {}
+      );
+    }
+
+    // 📍 button
+    const btn = document.createElement("button");
+    btn.innerHTML = "📍";
+    btn.title = "내 위치 보기";
+    btn.style.cssText =
+      "position:absolute;bottom:140px;right:12px;z-index:900;background:white;border:none;border-radius:50%;width:44px;height:44px;font-size:20px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;";
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      navigator.geolocation?.getCurrentPosition(
+        (pos) => {
+          placeMarker(pos.coords.latitude, pos.coords.longitude);
+          map.flyTo([pos.coords.latitude, pos.coords.longitude], 17);
+        },
+        () => {}
+      );
+    });
+    map.getContainer().appendChild(btn);
+
+    return () => {
+      if (watchId !== null) navigator.geolocation?.clearWatch(watchId);
+      btn.remove();
+      markerRef.current?.remove();
+      markerRef.current = null;
+    };
+  }, [map, isNavigating, onLocationUpdate]);
+
+  return null;
+}
+
+export default function KakaoMap({
+  places,
+  onPlaceSelect,
+  selectedPlaceId,
+  activeCourse,
+  coursePlaces = [],
+  currentStep = 0,
+  isNavigating = false,
+  onLocationUpdate,
+}: Props) {
   return (
-    <div className="relative w-full h-full">
-      <div ref={mapRef} className="w-full h-full" />
-      {loading && !mapError && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 gap-3">
-          <div className="w-8 h-8 border-4 border-gray-300 border-t-gray-700 rounded-full animate-spin" />
-          <p className="text-sm text-gray-500">지도 불러오는 중...</p>
-        </div>
+    <MapContainer
+      center={[IKSEON_CENTER.lat, IKSEON_CENTER.lng]}
+      zoom={17}
+      style={{ width: "100%", height: "100%" }}
+      zoomControl={false}
+    >
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      <UserLocationControl onLocationUpdate={onLocationUpdate} isNavigating={isNavigating} />
+
+      {activeCourse ? (
+        <CourseRouteControl
+          places={coursePlaces}
+          currentStep={currentStep}
+          isNavigating={isNavigating}
+        />
+      ) : (
+        places.map((place) => (
+          <Marker
+            key={`${place.id}-${place.id === selectedPlaceId}`}
+            position={[place.lat, place.lng]}
+            icon={createMarkerIcon(place, place.id === selectedPlaceId)}
+            eventHandlers={{ click: () => onPlaceSelect(place) }}
+          />
+        ))
       )}
-      {mapError && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-50 gap-2 px-6">
-          <p className="text-red-600 font-semibold text-sm text-center">지도 오류</p>
-          <p className="text-red-500 text-xs text-center">{mapError}</p>
-        </div>
-      )}
-    </div>
+    </MapContainer>
   );
 }
