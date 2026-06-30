@@ -19,7 +19,7 @@ export const ikseonPlaces: IkseonPlace[] = [
     tags: ["한옥", "골목", "근대문화유산", "포토존"],
     estimatedStayMinutes: 30,
     paid: false,
-    imageUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&auto=format",
+    imageUrl: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format",
   },
   {
     id: "p02",
@@ -238,7 +238,7 @@ export const ikseonPlaces: IkseonPlace[] = [
     tags: ["와인바", "전통주", "막걸리", "야간", "주점"],
     estimatedStayMinutes: 60,
     paid: true,
-    imageUrl: "https://images.unsplash.com/photo-1551024739-78a9b6e6e1d4?w=800&auto=format",
+    imageUrl: "https://images.unsplash.com/photo-1536924940846-227afb31e2a5?w=800&auto=format",
   },
   {
     id: "p13",

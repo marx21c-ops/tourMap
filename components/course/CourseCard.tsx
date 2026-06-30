@@ -14,7 +14,7 @@ export default function CourseCard({ course, onClick, onPreview }: Props) {
       onClick={onClick}
     >
       <div className="relative h-44">
-        <Image src={course.coverImage} alt={course.title} fill className="object-cover" />
+        <Image src={course.coverImage} alt={course.title} fill sizes="(max-width: 640px) 100vw, 50vw" className="object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
         <div className="absolute bottom-3 left-4 right-4">
           <div className="flex gap-1.5 flex-wrap mb-1">

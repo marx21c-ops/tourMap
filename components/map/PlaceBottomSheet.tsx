@@ -28,7 +28,7 @@ export default function PlaceBottomSheet({ place, onClose }: Props) {
 
         {place.imageUrl && (
           <div className="relative h-36 mx-5 rounded-xl overflow-hidden mb-4">
-            <Image src={place.imageUrl} alt={place.name} fill className="object-cover" />
+            <Image src={place.imageUrl} alt={place.name} fill sizes="100vw" className="object-cover" />
           </div>
         )}
 
