@@ -340,14 +340,7 @@ export default function HomePage() {
                     📍 가장 가까운 장소까지 약 {formatDistance(dist)}
                   </p>
                 )}
-                <CourseCard course={course} />
-                <button
-                  onClick={() => handleCourseSelect(course)}
-                  className="mt-2 w-full py-3 rounded-xl text-sm font-medium"
-                  style={{ backgroundColor: "#F3F4F5", color: "#151613" }}
-                >
-                  지도에서 미리보기 →
-                </button>
+                <CourseCard course={course} onPreview={() => handleCourseSelect(course)} />
               </div>
             );
           })}
