@@ -5,9 +5,10 @@ interface Props {
   course: Course;
   onClick?: () => void;
   onPreview?: () => void;
+  distanceText?: string;
 }
 
-export default function CourseCard({ course, onClick, onPreview }: Props) {
+export default function CourseCard({ course, onClick, onPreview, distanceText }: Props) {
   return (
     <div
       className="bg-white rounded-xl overflow-hidden shadow-sm"
@@ -28,7 +29,12 @@ export default function CourseCard({ course, onClick, onPreview }: Props) {
       </div>
       <div className="p-4">
         <h3 className="font-semibold text-base mb-0.5" style={{ color: "#151613" }}>{course.title}</h3>
-        <p className="text-sm mb-3" style={{ color: "#7C807B" }}>{course.subtitle}</p>
+        <p className="text-sm mb-2" style={{ color: "#7C807B" }}>{course.subtitle}</p>
+        {distanceText && (
+          <p className="text-xs mb-2 font-medium" style={{ color: "#151613" }}>
+            🚶 가장 가까운 장소까지 약 {distanceText}
+          </p>
+        )}
         <div className="flex gap-3 text-xs mb-4" style={{ color: "#7C807B" }}>
           <span>⏱ {course.duration}</span>
           <span>📍 {course.placeCount}개 장소</span>

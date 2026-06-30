@@ -11,7 +11,7 @@ import CategoryFilter from "@/components/map/CategoryFilter";
 import PlaceBottomSheet from "@/components/map/PlaceBottomSheet";
 import CourseCard from "@/components/course/CourseCard";
 import CourseNavGuide from "@/components/navigation/CourseNavGuide";
-import { addCompletedCourse } from "@/lib/stamps";
+import { addCompletedCourse, getCompletedCourses } from "@/lib/stamps";
 
 const KakaoMap = dynamic(() => import("@/components/map/KakaoMap"), { ssr: false });
 
@@ -34,6 +34,11 @@ export default function HomePage() {
   const [isNavigating, setIsNavigating] = useState(false);
   const [arrived, setArrived] = useState(false);
   const [showComplete, setShowComplete] = useState(false);
+  const [completedCount, setCompletedCount] = useState(0);
+
+  useEffect(() => {
+    setCompletedCount(getCompletedCourses().length);
+  }, [showComplete]);
 
   const filteredPlaces = getPlacesByCategory(activeCategory);
 
@@ -181,13 +186,23 @@ export default function HomePage() {
               </>
             )}
           </div>
-          {activeCourse && (
+          {activeCourse ? (
             <button
               onClick={handleExitCourse}
               className="px-4 py-2 rounded-xl text-xs font-medium border"
               style={{ borderColor: "#E2E2E2", color: "#7C807B", backgroundColor: "#FFFFFF" }}
             >
               코스 종료
+            </button>
+          ) : (
+            <button
+              onClick={() => router.push("/stamps")}
+              className="flex flex-col items-center gap-0.5"
+            >
+              <span className="text-xl leading-none">📖</span>
+              <span className="text-xs font-semibold" style={{ color: completedCount > 0 ? "#151613" : "#B0B3AF" }}>
+                {completedCount}/4
+              </span>
             </button>
           )}
         </div>
@@ -331,12 +346,11 @@ export default function HomePage() {
                     {course.title}
                   </span>
                 </div>
-                {userLocation && dist < Infinity && (
-                  <p className="text-xs mb-1.5 pl-1" style={{ color: "#7C807B" }}>
-                    📍 가장 가까운 장소까지 약 {formatDistance(dist)}
-                  </p>
-                )}
-                <CourseCard course={course} onPreview={() => handleCourseSelect(course)} />
+                <CourseCard
+                  course={course}
+                  onPreview={() => handleCourseSelect(course)}
+                  distanceText={userLocation && dist < Infinity ? formatDistance(dist) : undefined}
+                />
               </div>
             );
           })}
