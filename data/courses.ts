@@ -5,7 +5,7 @@ export const ikseonCourses: Course[] = [
     id: "c01",
     title: "익선동 한옥 감성 코스",
     subtitle: "100년의 시간을 걷다",
-    coverImage: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=1200&auto=format",
+    coverImage: "https://images.unsplash.com/photo-1751228112868-a0dd33ded0fe?w=1200&auto=format&fit=crop",
     duration: "약 2시간 30분",
     placeCount: 6,
     difficulty: "쉬움",
