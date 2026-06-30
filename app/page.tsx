@@ -11,6 +11,7 @@ import CategoryFilter from "@/components/map/CategoryFilter";
 import PlaceBottomSheet from "@/components/map/PlaceBottomSheet";
 import CourseCard from "@/components/course/CourseCard";
 import CourseNavGuide from "@/components/navigation/CourseNavGuide";
+import { addCompletedCourse } from "@/lib/stamps";
 
 const KakaoMap = dynamic(() => import("@/components/map/KakaoMap"), { ssr: false });
 
@@ -126,6 +127,7 @@ export default function HomePage() {
   const handleNextStep = useCallback(() => {
     if (!activeCourse) return;
     if (currentStep >= activeCourse.placeCount - 1) {
+      addCompletedCourse(activeCourse.id);
       setIsNavigating(false);
       setActiveCourse(null);
       setCurrentStep(0);
@@ -345,8 +347,7 @@ export default function HomePage() {
       {showComplete && (
         <div
           className="absolute inset-0 z-50 flex items-center justify-center"
-          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-          onClick={() => setShowComplete(false)}
+          style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
         >
           <div className="bg-white rounded-3xl px-8 py-10 mx-6 text-center">
             <p className="text-5xl mb-4">🎊</p>
@@ -354,12 +355,12 @@ export default function HomePage() {
               코스 완주!
             </h2>
             <p className="text-sm mb-6" style={{ color: "#7C807B" }}>
-              익선동 코스를 모두 둘러봤어요.
+              도장이 찍혔어요. 스탬프 북을 확인해보세요!
             </p>
             <button
-              className="px-8 py-3 rounded-xl text-sm font-semibold text-white"
+              className="w-full py-3 rounded-xl text-sm font-semibold text-white mb-2"
               style={{ backgroundColor: "#151613" }}
-              onClick={() => setShowComplete(false)}
+              onClick={() => { setShowComplete(false); router.push("/stamps"); }}
             >
               확인
             </button>
