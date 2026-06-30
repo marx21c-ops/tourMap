@@ -1,0 +1,10 @@
+{
+  "name": "익선동 AI 도슨트",
+  "short_name": "익선동",
+  "description": "익선동 골목 위치 기반 AI 도슨트 관광 서비스",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": []
+}
