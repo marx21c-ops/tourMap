@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef } from "react";
 import { IkseonPlace, CATEGORY_COLORS, IKSEON_CENTER } from "@/types";
 
 interface Props {
@@ -9,56 +9,65 @@ interface Props {
   selectedPlaceId?: string | null;
 }
 
+const EMOJI: Record<string, string> = {
+  hanok: "🏛️", cafe: "☕", food: "🍜", photo: "📸", workshop: "🎨", culture: "🏯",
+};
+
+function markerHTML(place: IkseonPlace, isSelected: boolean) {
+  const color = CATEGORY_COLORS[place.category];
+  const size = isSelected ? 44 : 36;
+  const font = isSelected ? 18 : 14;
+  return `<div style="width:${size}px;height:${size}px;background:${color};border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2.5px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="transform:rotate(45deg);font-size:${font}px;line-height:1;">${EMOJI[place.category]}</span></div>`;
+}
+
 export default function KakaoMap({ places, onPlaceSelect, selectedPlaceId }: Props) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<kakao.maps.Map | null>(null);
   const overlaysRef = useRef<kakao.maps.CustomOverlay[]>([]);
-  const myLocationOverlayRef = useRef<kakao.maps.CustomOverlay | null>(null);
+  const myLocRef = useRef<kakao.maps.CustomOverlay | null>(null);
+  const readyRef = useRef(false);
 
-  const createMarkerContent = useCallback(
-    (place: IkseonPlace, isSelected: boolean) => {
-      const color = CATEGORY_COLORS[place.category];
-      const size = isSelected ? 44 : 36;
-      const emoji = {
-        hanok: "🏛️",
-        cafe: "☕",
-        food: "🍜",
-        photo: "📸",
-        workshop: "🎨",
-        culture: "🏯",
-      }[place.category];
+  // Initialize map once
+  useEffect(() => {
+    const init = () => {
+      if (!mapRef.current || readyRef.current) return;
+      readyRef.current = true;
 
-      return `
-        <div style="
-          width: ${size}px;
-          height: ${size}px;
-          background: ${color};
-          border-radius: 50% 50% 50% 0;
-          transform: rotate(-45deg);
-          border: 2.5px solid white;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.2s;
-          ${isSelected ? "box-shadow: 0 4px 16px rgba(0,0,0,0.4);" : ""}
-        ">
-          <span style="transform: rotate(45deg); font-size: ${isSelected ? 18 : 14}px; line-height: 1;">${emoji}</span>
-        </div>
-      `;
-    },
-    []
-  );
+      const map = new window.kakao.maps.Map(mapRef.current, {
+        center: new window.kakao.maps.LatLng(IKSEON_CENTER.lat, IKSEON_CENTER.lng),
+        level: 3,
+      });
+      mapInstanceRef.current = map;
 
-  const initMap = useCallback(() => {
-    if (!mapRef.current || !window.kakao?.maps) return;
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((pos) => {
+          const { latitude: lat, longitude: lng } = pos.coords;
+          if (myLocRef.current) myLocRef.current.setMap(null);
+          myLocRef.current = new window.kakao.maps.CustomOverlay({
+            position: new window.kakao.maps.LatLng(lat, lng),
+            content: `<div style="width:20px;height:20px;background:#3B82F6;border-radius:50%;border:3px solid white;box-shadow:0 0 0 4px rgba(59,130,246,0.3);"></div>`,
+            map,
+            yAnchor: 0.5,
+          });
+          map.panTo(new window.kakao.maps.LatLng(lat, lng));
+        }, () => {});
+      }
+    };
 
-    const map = new window.kakao.maps.Map(mapRef.current, {
-      center: new window.kakao.maps.LatLng(IKSEON_CENTER.lat, IKSEON_CENTER.lng),
-      level: 3,
-    });
-    mapInstanceRef.current = map;
+    const tryInit = () => {
+      if (window.kakao) {
+        window.kakao.maps.load(init);
+      } else {
+        setTimeout(tryInit, 200);
+      }
+    };
+    tryInit();
+  }, []);
+
+  // Update markers when places or selection changes
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
 
     overlaysRef.current.forEach((o) => o.setMap(null));
     overlaysRef.current = [];
@@ -67,65 +76,15 @@ export default function KakaoMap({ places, onPlaceSelect, selectedPlaceId }: Pro
       const isSelected = place.id === selectedPlaceId;
       const overlay = new window.kakao.maps.CustomOverlay({
         position: new window.kakao.maps.LatLng(place.lat, place.lng),
-        content: createMarkerContent(place, isSelected),
+        content: markerHTML(place, isSelected),
         map,
         yAnchor: 1,
       });
-
       const el = (overlay as unknown as { a: HTMLElement }).a;
-      if (el) {
-        el.addEventListener("click", () => onPlaceSelect(place));
-      }
-
+      if (el) el.addEventListener("click", () => onPlaceSelect(place));
       overlaysRef.current.push(overlay);
     });
-
-    requestAnimationLocation(map);
-  }, [places, selectedPlaceId, onPlaceSelect, createMarkerContent]);
-
-  const requestAnimationLocation = (map: kakao.maps.Map) => {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude: lat, longitude: lng } = pos.coords;
-        if (myLocationOverlayRef.current) {
-          myLocationOverlayRef.current.setMap(null);
-        }
-        const content = `
-          <div style="
-            width: 20px; height: 20px;
-            background: #3B82F6;
-            border-radius: 50%;
-            border: 3px solid white;
-            box-shadow: 0 0 0 4px rgba(59,130,246,0.3);
-          "/>
-        `;
-        const overlay = new window.kakao.maps.CustomOverlay({
-          position: new window.kakao.maps.LatLng(lat, lng),
-          content,
-          map,
-          yAnchor: 0.5,
-        });
-        myLocationOverlayRef.current = overlay;
-        map.panTo(new window.kakao.maps.LatLng(lat, lng));
-      },
-      () => {}
-    );
-  };
-
-  useEffect(() => {
-    let cancelled = false;
-    const tryInit = () => {
-      if (cancelled) return;
-      if (window.kakao) {
-        window.kakao.maps.load(() => { if (!cancelled) initMap(); });
-      } else {
-        setTimeout(tryInit, 200);
-      }
-    };
-    tryInit();
-    return () => { cancelled = true; };
-  }, [initMap]);
+  }, [places, selectedPlaceId, onPlaceSelect]);
 
   return <div ref={mapRef} className="w-full h-full" />;
 }
